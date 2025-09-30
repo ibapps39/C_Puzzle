@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
@@ -10,7 +12,11 @@
 
 // Constants
 #define FRAME_RATE 60
-
+#define PLAYER_HEIGHT 2.0f
+#define PLAYER_RADIUS 0.5f
+#define GRAVITY -9.8f
+#define MOVE_SPEED 5.0f
+#define JUMP_FORCE 6.0f
 
 
 
@@ -21,18 +27,28 @@ typedef struct
     const char *cameraLabel;
 } CameraName;
 
+
+
 // Player data, including shape and score
 typedef struct
 {
-    Vector3 playerPOS;
-    PlayerShape playerBody;
-    double playerScore;
-    const char *playerName;
-    Camera3D playerCamera;
-    Vector3 previousPOS;       // Store previous position
-    Vector3 velocity;          // Store velocity vector
-    float collisionCooldown;   // Prevent multiple collisions in quick succession
+    double* playerScore;
+    const char* playerName;
+    Camera3D* playerCamera;
+    Vector3* currentPOS;
+    Vector3* velocity;         // Store velocity vector
 } Player;
+
+
+// Player data, including shape and score
+typedef struct
+{
+    Vector3* POS;
+    double* Score;
+    const char* Name;
+    Camera3D* Camera;
+    Vector3* Velocity;          // Store velocity vector
+} PlayerSettings;
 
 // Camera settings for player and its camera
 typedef struct
@@ -46,7 +62,13 @@ typedef struct
     Player associatedPlayer;
 } CameraSettings;
 
-/ Camera related functions
+// Axis-aligned bounding box for collisions
+typedef struct AABB {
+    Vector3 min;
+    Vector3 max;
+} AABB;
+
+// Camera related functions
 void InitCamera(Camera3D *camera, const CameraSettings *cameraSettings);
 void CameraTests(Camera *camera);
 void GetCameraProjectionInfo(Camera *camera);
@@ -57,18 +79,16 @@ void UpdatePlayerCAM(Player *player, Camera3D *playerCamera);
 void DrawGame(void);
 void CheckCollisions(void);
 float playersDist(const Player *player, const Player *opponent);
-adjustedMessage2D adjustMessage(const worldMessage *details);
+
 
 // Level Functions
-void DrawLevel(const Level *level);
-void DrawLevels(Level (*levels)[5]);
-void increaseLevelRadius(Level *level, float amount);
-void increaseLevelsRadi(Level (*levels)[NUM_LEVELS], float amount);
-// Draw Player
-void DrawPlayer(const Player *player);
+
+// Drawing Functions
+void DrawPlayerScore(const Player *player, const Camera3D *camera);
 
 
 // Player Movement and Interaction
+bool currentKey(KeyboardKey k); 
 void MoveCamera(Camera3D *camera);
 void MovePlayer(Player *player, const float units);
 void PlayerJump(Player *player, const float jumpHeight);
@@ -77,23 +97,21 @@ void DrawCameraInfo(const Camera3D *camera, const Player *player);
 void CameraInfo(Camera3D *camera);
 void UpdatePlayerCamera(Player *player);
 
-void DrawPlayerArms(const PlayerArms *arms, const Player *player);
-void repulsePlayer(Player *player, Player *opponent, float repulse);
-void repulsePlayersCollisions(Player *player, Player* players[NUM_PLAYERS], float repulse);
-void swayCPU(Player *cpu, Vector3 *center, const float *baseRadius, const float *angle, const float swayAmp, const float swayFreq);
-
-void displayPlayersDist(Player *player, Player *player2, Camera *cam);
 
 // Score and Scoring
 void incrementPoints(Player *player, double points);
 void animatedScored(Player* player, Camera* cam);
 
+//Set Functions
+// bool setPOS(Player* player, Vector3* pos);
+// bool setPOS(Player* player, Vector3* pos));
+bool setPOS(Player* player, float x, float y, float z);
+bool setVelocity(Player* player, Vector3* v);
+bool setCamera(Player* player, Camera3D* Camera3D);
+bool setName(Player* player, const char* name);
+bool setScore(Player* player, double score);
 
-void DrawPlayerScore(const Player *player, const Camera3D *camera);
-
-void displayPlayerPoints(const worldMessage *wm);
 
 void debugDisplay(Player player, Camera* camera);
 
 void UpdatePlayerVelocity(Player *player);
-void playersAnimatedScored(Player *players[NUM_PLAYERS], Camera *cam);
