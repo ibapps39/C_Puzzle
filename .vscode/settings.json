@@ -3,5 +3,6 @@
     "files.associations": {
         "*.cpp": "cpp",
         "__node_handle": "c"
-    }
+    },
+    "makefile.configureOnOpen": true
 }

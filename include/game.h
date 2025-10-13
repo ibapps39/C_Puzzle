@@ -10,6 +10,7 @@
 
 #include "raylib.h"
 #include "rlgl.h"
+#include "raymath.h"
 
 // Constants
 #define FRAME_RATE 60
@@ -18,6 +19,8 @@
 #define GRAVITY -9.8f
 #define MOVE_SPEED 5.0f
 #define JUMP_FORCE 6.0f
+
+#define TURQUOISE CLITERAL(Color){ 64, 224, 208, 255 }
 
 
 
@@ -111,53 +114,42 @@ void InitPlayerByValue(
     player->velocity = &v;
 }
 
-void MovePlayer(Player *player, const float units)
-{
-    // if player turns past 2pi, subtract it 0 for next count
-    if (player->angle <= 0) {
-        player->angle += 2*PI;
-        
-    }
-    if (player->angle >= 2*PI) 
-    {
-        player->angle -= 2*PI;
-    }
-    if (IsKeyDown(KEY_W))
-    {
-        player->currentPOS->z += units;
-    }
-    if (IsKeyDown(KEY_S))
-    {
-        player->currentPOS->z -= units;
-    }
-    if (IsKeyDown(KEY_A))
-    {
-        player->currentPOS->x += units;
-    }
-    if (IsKeyDown(KEY_D))
-    {
-        player->currentPOS->x -= units;
+int sign(int x){
+    if(x > 0){
+        return 1;
+    }else if(x == 0){
+        return 0;
+    }else{
+        return -1;
     }
 }
-void MoveCamera(Camera3D *cam, const float units)
+
+void MovePlayer(Player *player, Camera3D* cam, const float units)
 {
-    if (IsKeyDown(KEY_W))
-    {
-        cam->position.z += units;
-    }
-    if (IsKeyDown(KEY_S))
-    {
-        cam->position.z -= units;
-    }
-    if (IsKeyDown(KEY_A))
-    {
-        cam->position.x -= units;
-    }
-    if (IsKeyDown(KEY_D))
-    {
-        cam->position.x += units;
-    }
+    Vector3 pos = *player->currentPOS;
+
+    // Calculate forward and right direction based on the camera's orientation
+    Vector3 forward = Vector3Normalize(Vector3Subtract(cam->target, cam->position));
+    Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, cam->up));
+
+    // Movement input
+    if (IsKeyDown(KEY_W)) pos = Vector3Add(pos, Vector3Scale(forward, units));
+    if (IsKeyDown(KEY_S)) pos = Vector3Subtract(pos, Vector3Scale(forward, units));
+    if (IsKeyDown(KEY_A)) pos = Vector3Subtract(pos, Vector3Scale(right, units));
+    if (IsKeyDown(KEY_D)) pos = Vector3Add(pos, Vector3Scale(right, units));
+    if (IsKeyDown(KEY_SPACE)) pos.y += units;
+    if (IsKeyDown(KEY_LEFT_CONTROL)) pos.y -= units;
+
+    // Update the player's position
+    *player->currentPOS = pos;
+
+    // Also update the camera to follow the player
+    cam->position = pos;
+    cam->target = Vector3Add(pos, (Vector3){0, 0, 1}); // Look slightly forward
 }
+
+
+
 
 // Points u to v
 void SetVector(Vector3* u, Vector3* v)
@@ -197,7 +189,18 @@ void SetPlayerVector(Player* player, Vector3* u)
 void GetPlayerAngle(Player* player)
 {
     double pdx, pdy;
-    
+}
+
+void drawDirections()
+{
+        DrawCube((Vector3){-100,0,1000}, 100, 100, 100, RED); // NORTH
+        DrawCube((Vector3){-100,100,1000}, 100, 100, 100, RED); // NORTH
+        DrawCube((Vector3){0,0,1000}, 100, 100, 100, RED); // NORTH
+        DrawCube((Vector3){100,100,1000}, 100, 100, 100, RED); // NORTH
+        
+        DrawCube((Vector3){0,0,-1000}, 100, 100, 100, GREEN); // SOUTH
+        DrawCube((Vector3){-1000,0,0}, 100, 100, 100, BLUE); // WEST
+        DrawCube((Vector3){1000,0,0}, 100, 100, 100, YELLOW); // EAST
 }
 
 //**
@@ -243,24 +246,3 @@ void GetPlayerAngle(Player* player)
 // void debugDisplay(Player player, Camera* camera);
 
 // void UpdatePlayerVelocity(Player *player);
-
-
-// void displayViewPortStats(Camera3D viewport_cam)
-// {
-//     DrawText(
-//             TextFormat(
-//                 "CAMERA\n
-//                 \tviewport_cam.fovy :\t % .2f\n
-//                 \tviewport_cam.position :\t % .2f\n
-//                 \tviewport_cam.projection :\t % .2f\n
-//                 \tviewport_cam.target :\t % .2f % .2f % .2f\n
-//                 \tviewport_cam.up :\t % .2f\n",
-//                 viewport_cam.fovy,
-//                 viewport_cam.position,
-//                 viewport_cam.projection,
-//                 viewport_cam.target.x,
-//                 viewport_cam.target.y,
-//                 viewport_cam.target.z,
-//                 viewport_cam.up),
-//             10, 280, 25, BLACK);
-// }
