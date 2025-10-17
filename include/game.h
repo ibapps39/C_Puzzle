@@ -151,31 +151,6 @@ void MoveTest(Camera3D* cam, const float speed)
     cam->position = pos;
 }
 
-void MovePlayer(Player *player, Camera3D* cam, const float units)
-{
-    Vector3 pos = *player->currentPOS;
-
-    // Calculate forward and right direction based on the camera's orientation
-    Vector3 forward = Vector3Normalize(Vector3Subtract(cam->target, cam->position));
-    Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, cam->up));
-
-    // Movement input
-    if (IsKeyDown(KEY_W)) pos = Vector3Add(pos, Vector3Scale(forward, units));
-    if (IsKeyDown(KEY_S)) pos = Vector3Subtract(pos, Vector3Scale(forward, units));
-    if (IsKeyDown(KEY_A)) pos = Vector3Subtract(pos, Vector3Scale(right, units));
-    if (IsKeyDown(KEY_D)) pos = Vector3Add(pos, Vector3Scale(right, units));
-    if (IsKeyDown(KEY_SPACE)) pos.y += units;
-    if (IsKeyDown(KEY_LEFT_CONTROL)) pos.y -= units;
-
-    // Update the player's position
-    *player->currentPOS = pos;
-
-    // Also update the camera to follow the player
-    cam->position = pos;
-    cam->target = Vector3Add(pos, (Vector3){0, 0, 1}); // Look slightly forward
-}
-
-
 
 
 // Points u to v
@@ -229,49 +204,3 @@ void drawDirections()
         DrawCube((Vector3){-1000,0,0}, 100, 100, 100, BLUE); // WEST
         DrawCube((Vector3){1000,0,0}, 100, 100, 100, YELLOW); // EAST
 }
-
-
-
-//**
-// // Game Update and Draw functions
-// void UpdateGame(void);
-// void UpdatePlayerCAM(Player *player, Camera3D *playerCamera);
-// void DrawGame(void);
-// void CheckCollisions(void);
-// float playersDist(const Player *player, const Player *opponent);
-
-
-// // Level Functions
-
-// // Drawing Functions
-// void DrawPlayerScore(const Player *player, const Camera3D *camera);
-
-
-// // Player Movement and Interaction
-// bool currentKey(KeyboardKey k); 
-// void MoveCamera(Camera3D *cam, const float units);
-// void MovePlayer(Player *player, const float units);
-// void PlayerJump(Player *player, const float jumpHeight);
-// void GetPlayerInfo(const Player *player);
-// void DrawCameraInfo(const Camera3D *camera, const Player *player);
-// void CameraInfo(Camera3D *camera);
-// void UpdatePlayerCamera(Player *player);
-
-
-// // Score and Scoring
-// void incrementPoints(Player *player, double points);
-// void animatedScored(Player* player, Camera* cam);
-
-// //Set Functions
-// // bool setPOS(Player* player, Vector3* pos);
-// // bool setPOS(Player* player, Vector3* pos));
-// bool setPOS(Player* player, float x, float y, float z);
-// bool setVelocity(Player* player, Vector3* v);
-// bool setCamera(Player* player, Camera3D* Camera3D);
-// bool setName(Player* player, const char* name);
-// bool setScore(Player* player, double score);
-
-
-// void debugDisplay(Player player, Camera* camera);
-
-// void UpdatePlayerVelocity(Player *player);
