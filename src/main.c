@@ -7,85 +7,104 @@ int main()
     int screenHeight = GetScreenHeight();
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 
-    // Basic scene setup
-    Vector3 cube_pos = {0.0f, 1.0f, 0.0f};
-    Vector3 cubeSize = {2.0f, 2.0f, 2.0f};
-    Vector3 floor = {0.0f, -2.0f, 0.0f};
+    // Reference Cube
+    Vector3 refCube_pos;
+    int refCube_width, refCube_height, refCube_length;
+    Color refCube_color;
+    refCube_pos = (Vector3){0.0f, 2.0f, 4.0f};
+    refCube_width = 2;
+    refCube_height = 2;
+    refCube_length = 2;
+    refCube_color = BLUE;
 
-    // Properly allocate Vector3s
-    Vector3 playerPosition = {0};
-    Vector3 playerVelocity = {0};
+    // Floor
+    Vector3 floor_pos;
+    int floor_width, floor_height, floor_length;
+    Color floor_color = RED;
+    floor_pos = (Vector3){0.0f, -2.0f, 0.0f};
+    floor_width = 1000;
+    floor_height = 2;
+    floor_length = 1000;
+    float floor = 2.0f; // y
 
-    // Player Camera
-    Camera3D player_cam = {
-    .position = playerPosition,
-    .target = {0, 0, 10},
-    .up = {0, 1, 0},
-    .fovy = 45.0f,
-    .projection = CAMERA_FIRST_PERSON
-};
+    // Camera
+    Camera3D the_camera;
+    the_camera.fovy = 120;
+    the_camera.position = (Vector3){0.0f, 2.0f, 0.0f};
+    the_camera.projection = CAMERA_PERSPECTIVE;
+    the_camera.target = refCube_pos;
+    the_camera.up = (Vector3){0.0f, 2.0f, 0.0f};
 
-    Player player = {
-        .playerName = "p1",
-        .currentPOS = &player_cam.position,
-        .velocity = &playerVelocity,
-        .playerCamera = NULL,  // Set below
-        .playerScore = 0
-    };
-
-    player.playerCamera = &player_cam;
+    enum FEATURE_FLAG {
+        FALSE,
+        TRUE
+    } FEATURE_FLAG;
+    
+    const char* FEATURE_FLAG_STATUS[2];
+    FEATURE_FLAG_STATUS[FALSE] = "ORTHO";
+    FEATURE_FLAG_STATUS[TRUE] = "PERSPECTIVE";
 
     // Main game loop
     while (!WindowShouldClose())
     {
-        
-        if (player.currentPOS->y <= 0) player.currentPOS->y = 1;
+        static enum FEATURE_FLAG FLAG = FALSE;
         // Delta time for frame-independent movement
         float delta = GetFrameTime();
+        
+        // if (IsKeyPressed(KEY_ONE))
+        // {
+        //     FLAG = !FLAG;
+        // }
 
-        // Move the player based on input and camera orientation
-        MovePlayer(&player, player.playerCamera, 5.0f * delta);
+        // switch (FLAG)
+        // {
+        // case FALSE:
+        //     the_camera.projection = CAMERA_ORTHOGRAPHIC;
+        //     break;
+        
+        // default:
+        //     the_camera.projection = CAMERA_PERSPECTIVE;
+        //     break;
+        // }
+        
+        //UpdateCamera(&the_camera, CAMERA_FIRST_PERSON);
+        
+        MoveTest(&the_camera, 5.0f * delta);
 
         // Reset player position if Q is pressed
-        if (IsKeyDown(KEY_Q))
-        {
-            SetPlayerPoint(&player, 0, 0, 0);
-        }
-
-        // Update camera mode (first-person controls)
-        UpdateCamera(player.playerCamera, player.playerCamera->projection);
+        if (IsKeyDown(KEY_Q)) the_camera.position = (Vector3){0, floor, 0};
 
         // Begin 3D drawing
         BeginDrawing();
         ClearBackground(WHITE);
-        BeginMode3D(*player.playerCamera);
+        BeginMode3D(the_camera);
 
         // Draw the scene
-        DrawCube(floor, 100, floor.y+2, 100, ORANGE);
-        DrawCube(cube_pos, cubeSize.x, cubeSize.y, cubeSize.z, BLUE);
+        DrawCube(floor_pos, floor_width, floor_height, floor_length, floor_color);
+        DrawCube(refCube_pos, refCube_width, refCube_height, refCube_length, refCube_color);
         drawDirections();
-        // DrawCube(*player.currentPOS, 2, 2, 2, YELLOW); // Optional: show player
 
         EndMode3D();
 
         // HUD or debug info
         DrawText(
-            TextFormat("player.currentPOS->x:%.2f\nplayer.currentPOS->y:%.2f\nplayer.currentPOS->z:%.2f\nplayer.playerCamera->position:%.2f\nplayer.playerCamera->position.y:%.2f\nplayer.playerCamera->position.z:%.2f\nplayer.playerCamera->target.x:%.2f\nplayer.playerCamera->target.y:%.2f\nplayer.playerCamera->target.z:%.2f\n",
-            player.currentPOS->x,
-            player.currentPOS->y,
-            player.currentPOS->z,
-            player.playerCamera->position.x,
-            player.playerCamera->position.y,
-            player.playerCamera->position.z,
-            player.playerCamera->target.x,
-            player.playerCamera->target.y,
-            player.playerCamera->target.z
+            TextFormat("the_camera.position.x:%.2f\nthe_camera.position.y:%.2f\nthe_camera.position.z:%.2f\nthe_camera.target.x:%.2f\nthe_camera.target.y:%.2f\nthe_camera.target.z:%.2f\n",
+            the_camera.position.x,
+            the_camera.position.y,
+            the_camera.position.z,
+            the_camera.target.x,
+            the_camera.target.y,
+            the_camera.target.z
         ),
         10,
         100,
         10,
         BLACK
         );
+
+         DrawText( TextFormat("FLAG: %i", FLAG), 10, 200, 10, ORANGE);
+        //  DrawText( TextFormat("FLAG STATUS: %s", FEATURE_FLAG_STATUS[FLAG]), 10, 30, 10, PINK);
+
         EndDrawing();
     }
 
