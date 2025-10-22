@@ -16,10 +16,12 @@
 #define FRAME_RATE 60
 #define PLAYER_HEIGHT 2.0f
 #define PLAYER_RADIUS 0.5f
-#define GRAVITY -9.8f
+#define GRAVITY 9.8f
 #define MOVE_SPEED 5.0f
 #define JUMP_FORCE 6.0f
+#define SPRINT_MODIFER 10.0f
 #define GROUND 2
+
 
 #define TURQUOISE CLITERAL(Color){ 64, 224, 208, 255 }
 
@@ -151,6 +153,107 @@ void MoveTest(Camera3D* cam, const float speed)
     cam->position = pos;
 }
 
+void moveBasedCam(Camera3D* cam, const float speed)
+{
+    bool moveFwd = IsKeyDown(KEY_W);
+    bool moveBack = IsKeyDown(KEY_S);
+    bool moveLeft = IsKeyDown(KEY_A);
+    bool moveRight = IsKeyDown(KEY_D);
+    bool moveJump = IsKeyDown(KEY_SPACE);
+    bool moveSprint = IsKeyDown(KEY_LEFT_CONTROL);
+
+    if (moveFwd || moveBack || moveLeft || moveRight || moveJump)
+    {
+        float units = IsKeyDown(KEY_LEFT_SHIFT) ? (float)SPRINT_MODIFER * speed : speed;
+        Vector3 pos = cam->position;
+        Vector3 target = cam->target;
+        Vector3 fwd = Vector3Subtract(target, pos);
+        Vector3 fwdN = Vector3Normalize(fwd);
+        Vector3 fwdNScaled = Vector3Scale(fwdN, units);
+
+
+        Vector3 delta = (Vector3){0.0f, 0.0f, 0.0f};
+
+        if (moveFwd) delta = Vector3Add(delta, fwdNScaled);
+        if (moveBack) delta = Vector3Subtract(delta, fwdNScaled);
+        if (moveRight || moveLeft) {
+            Vector3 perpV = Vector3CrossProduct(fwdN, cam->up);
+            Vector3 perpN = Vector3Normalize(perpV);
+            Vector3 perpNScaled = Vector3Scale(perpN, units);
+            if (moveLeft) delta = Vector3Subtract(delta, perpNScaled);
+            if (moveRight) delta = Vector3Add(delta, perpNScaled);
+        }
+        
+        if (moveJump) delta.y += units;
+        if (moveSprint) delta.y -= units;
+
+        cam->position = Vector3Add(pos, delta);
+        // float smoothing = 0.2f; // tweak for responsiveness vs. smoothness
+        // Vector3 newPos = Vector3Add(pos, delta);
+        // cam->position = Vector3Lerp(cam->position, newPos, smoothing);
+
+    }
+    else return;
+}
+
+
+void RotateCamera(Camera3D* cam, float mouseSensitivity, float* yaw, float* pitch)
+{
+    Vector2 mouse_delta = GetMouseDelta();
+
+    // looking left/right
+    *yaw += mouse_delta.x * mouseSensitivity;
+    // looking up/down. Inverted Y for screen so more up of cursor is a negative delta, so to add me flip sign 
+    *pitch -=  mouse_delta.y * mouseSensitivity;
+
+    if (*pitch > 89.0f) { *pitch = 89.0f; }
+    if (*pitch < -89.0f) { *pitch = -89.0f; }
+
+    float pitch_radians = DEG2RAD * (*pitch);
+    float yaw_radians = DEG2RAD * (*yaw);
+
+    Vector3 direction = {
+        cosf(pitch_radians) * cosf(yaw_radians),
+        sinf(pitch_radians),
+        cosf(pitch_radians) * sinf(yaw_radians)
+    };
+    
+    cam->target = Vector3Add(cam->position, direction);
+}
+
+
+void Gravity(Camera3D* cam, float* velocityY)
+{
+    float dt = GetFrameTime();
+
+    if (cam->position.y > GROUND)
+    {
+        // Apply gravity (increase downward velocity)
+        *velocityY += GRAVITY * dt;
+
+        // Apply velocity to position
+        cam->position.y -= (*velocityY) * dt;
+
+        // Prevent going below the ground
+        if (cam->position.y < GROUND)
+        {
+            cam->position.y = GROUND;
+            *velocityY = 0.0f; // reset velocity when hitting the ground
+        }
+    }
+    else
+    {
+        // Reset when on the ground
+        cam->position.y = GROUND;
+        *velocityY = 0.0f;
+    }
+}
+
+// V
+void vel()
+{
+    
+}
 
 
 // Points u to v

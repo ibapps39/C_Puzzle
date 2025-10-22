@@ -35,6 +35,14 @@ int main()
     the_camera.target = refCube_pos;
     the_camera.up = (Vector3){0.0f, 2.0f, 0.0f};
 
+    // XVA
+    Vector3 currentPOS = (Vector3){0};
+    Vector3 previousPOS = currentPOS; 
+    float V = Vector3Length( Vector3Subtract(*&currentPOS, *&previousPOS) );
+    float* Vc = &V;
+    float A = (*Vc-V);
+    
+
     enum FEATURE_FLAG {
         FALSE,
         TRUE
@@ -44,12 +52,25 @@ int main()
     FEATURE_FLAG_STATUS[FALSE] = "ORTHO";
     FEATURE_FLAG_STATUS[TRUE] = "PERSPECTIVE";
 
+    SetMousePosition(GetScreenWidth() / 2, GetScreenHeight() / 2);
+    DisableCursor();  // Locks the mouse and hides the cursor
+    float yaw = 0.0f;
+    float pitch = 0.0f;
+
+    float verticalVelocity = 0.0f;
     // Main game loop
     while (!WindowShouldClose())
     {
+        currentPOS = *&the_camera.position;
+        previousPOS = currentPOS;
+        
         static enum FEATURE_FLAG FLAG = FALSE;
         // Delta time for frame-independent movement
         float delta = GetFrameTime();
+
+        V = Vector3Length( Vector3Subtract(*&currentPOS, *&previousPOS) );
+        Vc = &V;
+        A = (*Vc-V);
         
         // if (IsKeyPressed(KEY_ONE))
         // {
@@ -69,7 +90,11 @@ int main()
         
         //UpdateCamera(&the_camera, CAMERA_FIRST_PERSON);
         
-        MoveTest(&the_camera, 5.0f * delta);
+        //MoveTest(&the_camera, 5.0f * delta);
+        //MoveTest(&camera, deltaTime * speed);  // existing movement code
+        moveBasedCam(&the_camera, 5.0f * delta);
+        RotateCamera(&the_camera, 0.1f, &yaw, &pitch);  // mouse look
+        Gravity(&the_camera, &verticalVelocity);
 
         // Reset player position if Q is pressed
         if (IsKeyDown(KEY_Q)) the_camera.position = (Vector3){0, floor, 0};
@@ -101,6 +126,24 @@ int main()
         10,
         BLACK
         );
+
+                DrawText(
+            TextFormat("curposition.x:%.2f\ncurposition.y:%.2f\ncurposition.z:%.2f\n,prevposition.x:%.2f\nprevposition.y:%.2f\nprevposition.z:%.2f\nv:%.2f\na:%.2f\n",
+                currentPOS.x,
+                currentPOS.y,
+                currentPOS.z,
+                previousPOS.x,
+                previousPOS.y,
+                previousPOS.z,
+                Vc,
+                A
+        ),
+        10,
+        210,
+        20,
+        PINK
+        );
+
 
          DrawText( TextFormat("FLAG: %i", FLAG), 10, 200, 10, ORANGE);
         //  DrawText( TextFormat("FLAG STATUS: %s", FEATURE_FLAG_STATUS[FLAG]), 10, 30, 10, PINK);
