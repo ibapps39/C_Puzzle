@@ -37,12 +37,11 @@ int main()
 
     // XVA
     Vector3 currentPOS = (Vector3){0};
-    Vector3 previousPOS = currentPOS; 
+    Vector3 previousPOS = currentPOS;
     float V = Vector3Length( Vector3Subtract(*&currentPOS, *&previousPOS) );
     float* Vc = &V;
     float A = (*Vc-V);
     
-
     enum FEATURE_FLAG {
         FALSE,
         TRUE
@@ -58,6 +57,9 @@ int main()
     float pitch = 0.0f;
 
     float verticalVelocity = 0.0f;
+
+    CubeNode* LIST = GenCubeList(10);
+    //CubeNode* SortedLIST = SortedCubeList(LIST, 10);
     // Main game loop
     while (!WindowShouldClose())
     {
@@ -72,30 +74,11 @@ int main()
         Vc = &V;
         A = (*Vc-V);
         
-        // if (IsKeyPressed(KEY_ONE))
-        // {
-        //     FLAG = !FLAG;
-        // }
 
-        // switch (FLAG)
-        // {
-        // case FALSE:
-        //     the_camera.projection = CAMERA_ORTHOGRAPHIC;
-        //     break;
-        
-        // default:
-        //     the_camera.projection = CAMERA_PERSPECTIVE;
-        //     break;
-        // }
-        
-        //UpdateCamera(&the_camera, CAMERA_FIRST_PERSON);
-        
-        //MoveTest(&the_camera, 5.0f * delta);
-        //MoveTest(&camera, deltaTime * speed);  // existing movement code
         moveBasedCam(&the_camera, 5.0f * delta);
         RotateCamera(&the_camera, 0.1f, &yaw, &pitch);  // mouse look
         Gravity(&the_camera, &verticalVelocity);
-
+        
         // Reset player position if Q is pressed
         if (IsKeyDown(KEY_Q)) the_camera.position = (Vector3){0, floor, 0};
 
@@ -106,8 +89,10 @@ int main()
 
         // Draw the scene
         DrawCube(floor_pos, floor_width, floor_height, floor_length, floor_color);
-        DrawCube(refCube_pos, refCube_width, refCube_height, refCube_length, refCube_color);
-        drawDirections();
+       // DrawCube(refCube_pos, refCube_width, refCube_height, refCube_length, refCube_color);
+        //drawDirections();
+        drawCubeSort(LIST, (Vector3){-1, 4, 4}, 4);
+        //drawCubeSort(SortedLIST, (Vector3){-1+4, 4+4, 4+4}, 4);
 
         EndMode3D();
 
