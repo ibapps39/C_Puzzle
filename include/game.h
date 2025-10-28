@@ -284,111 +284,146 @@ void drawDirections()
     DrawCube((Vector3){-1000, 0, 0}, 100, 100, 100, BLUE);  // WEST
     DrawCube((Vector3){1000, 0, 0}, 100, 100, 100, YELLOW); // EAST
 }
-typedef struct CubeNode
-{
-    struct CubeNode* next;
-    Color color;
-} CubeNode;
+// typedef struct CubeNode
+// {
+//     struct CubeNode* next;
+//     Color color;
+// } CubeNode;
 
-#include "ranlib.h"
-#include "time.h"
-CubeNode GenCubeNode()
-{
-    CubeNode t = {
-        .next = NULL,
-        .color = (Color){GetRandomValue(0,255), GetRandomValue(0,255), GetRandomValue(0,255), 255}
-    };
-    return t;
-}
-CubeNode* GenCubeList(int size)
-{
-    CubeNode* list = (CubeNode*) malloc(sizeof(CubeNode)*size);
-    for (int i = 0; i < size; i++)
-    {
-        list[i] = GenCubeNode();
-    }
-    for (int i = 0; i < size; i++)
-    {
-        list[i].next = &list[i+1];
-        if (i == size - 1) list[i].next = NULL;
-    }
-    return list;
-}
+// #include "ranlib.h"
+// #include "time.h"
+// CubeNode GenCubeNode()
+// {
+//     CubeNode t = {
+//         .next = NULL,
+//         .color = (Color){GetRandomValue(0,255), GetRandomValue(0,255), GetRandomValue(0,255), 255}
+//     };
+//     return t;
+// }
+// CubeNode* GenCubeList(int size)
+// {
+//     CubeNode* list = (CubeNode*) malloc(sizeof(CubeNode)*size);
+//     for (int i = 0; i < size; i++)
+//     {
+//         list[i] = GenCubeNode();
+//     }
+//     for (int i = 0; i < size; i++)
+//     {
+//         list[i].next = &list[i+1];
+//         if (i == size - 1) list[i].next = NULL;
+//     }
+//     return list;
+// }
 
-Color lowColor(Color c1, Color c2)
-{
-    // MAYBE DO AN AVG ?!?!?!?!?
-    if ( ((c1.r <= c2.r) + (c1.g <= c2.g) + (c1.b <= c2.b)) >= 2) 
-    {
-        return c1;
-    } else {
-        return c2;
-    }
-}
-// Nondestructive/get a new, sorted list
-CubeNode* SortedCubeList(CubeNode* list, size_t size)
-{
-    //CubeNode* sorted_list = (CubeNode*)malloc(sizeof(CubeNode)*(sizeof(list)/sizeof(list[0])));
-    CubeNode* sorted_list = (CubeNode*)malloc(size);
-    //CubeNode* old_list = list;
+// Color lowColor(Color c1, Color c2)
+// {
+//     // MAYBE DO AN AVG ?!?!?!?!?
+//     // if ( ((c1.r <= c2.r) + (c1.g <= c2.g) + (c1.b <= c2.b)) >= 2) 
+//     // {
+//     //     return c1;
+//     // } else {
+//     //     return c2;
+//     // }
+//     int c1s = c1.r + c1.g + c1.b+c1.a;
+//     int c2s = c2.r + c2.g + c2.b+c2.a;
+//     return (c1s <= c2s) ? c1 : c2;
+// }
+// CubeNode lowColorCube(CubeNode c1, CubeNode c2)
+// {
+//     int c1s = c1.color.r + c1.color.g + c1.color.b + c1.color.a;
+//     int c2s = c2.color.r + c2.color.g + c2.color.b + c2.color.a;
+//     return (c1s <= c2s) ? c1 : c2;
+// }
+// int getCubeVal(CubeNode c)
+// {
+//     return c.color.r+c.color.a+c.color.b+c.color.a;
+// }
+// int lowColorCubeVal(CubeNode c1, CubeNode c2)
+// {
+//     int c1s = c1.color.r + c1.color.g + c1.color.b;
+//     int c2s = c2.color.r + c2.color.g + c2.color.b;
+//     return (c1s <= c2s) ? c1s : c2s;
+// }
+// // Nondestructive/get a new, sorted list
+// CubeNode* SortedCubeList(CubeNode* list, size_t size)
+// {
+//     //CubeNode* sorted_list = (CubeNode*)malloc(sizeof(CubeNode)*(sizeof(list)/sizeof(list[0])));
+//     CubeNode* sorted_list = (CubeNode*)malloc(size);
+//     //CubeNode* old_list = list;
 
-    if (size < 1)
-    {
-        printf("Error, no list/size 0\n");
-        return list; // or NULL? 
-    }
+//     if (size < 1)
+//     {
+//         printf("Error, no list/size 0\n");
+//         return list; // or NULL? 
+//     }
 
-    for (int i = 0; i<size; i++)
-    {
-        sorted_list[i] = list[i];
-    }
+//     for (int i = 0; i<size; i++)
+//     {
+//         sorted_list[i] = list[i];
+//     }
 
-    //size_t size = sizeof(list)/sizeof(list[0]);
-    if (size <= 3) 
-    {
-        for (int i = 0; i<size; i++)
-        {
-            sorted_list[i].color = lowColor(list[i].color, list[i+1].color);
-            if (i+1 == size)
-            {
-                sorted_list[i].next = NULL;
-            } else {
-                sorted_list[i].next =  &sorted_list[i+1];
-            }
-        }
-    }
+//     //size_t size = sizeof(list)/sizeof(list[0]);
+
+//     // for each element, check the color value, compare to known lowest. if current is lower than lowest, swap and move everythinbg forward.
+//     struct lowest {CubeNode cn; int val};
+//     struct lowest = {.cn = sorted_list[0], .val = getColorVal};
+//     for (size_t i = 0; i < size; i++)
+//     {   int val = getColorVal(sorted_list[i].color);
+//         sorted_list[i] = lowColorCube(sorted_list[i],sorted_list[i+1]);
+//         // lower than lowest?
+//         if (getColorVal(sorted_list[i].color) < lowestVal)
+//         {
+//                CubeNode t_low = lowe
+//         }
+//     }
     
-    //odd
-    if (size % 2 > 0)
-    {
-        
-    }
 
-    for (int i = 0; i<size/2; i++)
-    {
-        sorted_list[i].color = lowColor(sorted_list[i].color, sorted_list[i+1].color);
-        sorted_list[i].next = &sorted_list[i+1];
-        sorted_list[(size/2)+i].color = lowColor(sorted_list[i].color, sorted_list[(size/2)+i].color);
-        sorted_list[(size/2)+i].next = &sorted_list[(size/2)+i+1];
-        if ((size/2)+i+1 == size)
-        {
-            sorted_list[(size/2)+i].next = NULL;
+//     if (size <= 3) 
+//     {
+//         for (int i = 0; i<size; i++)
+//         {
+//             sorted_list[i].color = lowColor(list[i].color, list[i+1].color);
+//             if (i+1 == size)
+//             {
+//                 sorted_list[i].next = NULL;
+//             } else {
+//                 sorted_list[i].next =  &sorted_list[i+1];
+//             }
+//         }
+//     }
+    
+//     //odd
+//     if (size % 2 > 0)
+//     {
+        
+//     }
+
+//     for (int i = 0; i<size/2; i++)
+//     {
+//         sorted_list[i].color = lowColor(sorted_list[i].color, sorted_list[i+1].color);
+//         sorted_list[i].next = &sorted_list[i+1];
+//         sorted_list[(size/2)+i].color = lowColor(sorted_list[i].color, sorted_list[(size/2)+i].color);
+//         sorted_list[(size/2)+i].next = &sorted_list[(size/2)+i+1];
+//         if ((size/2)+i+1 == size)
+//         {
+//             sorted_list[(size/2)+i].next = NULL;
             
-        }
+//         }
         
-    }
-    return sorted_list;
-}
+//     }
+//     return sorted_list;
+// }
 
-void drawCubeSort(CubeNode* list, Vector3 v, int area)
-{
-    int CUBES_X_START = v.x;
-    int CUBES_Y_START = v.y;
-    int CUBES_Z_START = v.z;
-    int i = 0;
-    for (CubeNode* node = list; node != NULL; node = node->next, i++)
-    {
-        int x = CUBES_X_START+(CUBES_X_START*i*area);
-        DrawCube((Vector3){ x, CUBES_Y_START, CUBES_Z_START }, area, area, area, node->color);
-    }
-}
+// void drawCubeSort(CubeNode* list, Vector3 v, int area)
+// {
+//     int CUBES_X_START = v.x;
+//     int CUBES_Y_START = v.y;
+//     int CUBES_Z_START = v.z;
+//     int i = 0;
+//     for (CubeNode* node = list; node != NULL; node = node->next, i++)
+//     {
+//         int x = CUBES_X_START+(CUBES_X_START*i*area);
+//         DrawCube((Vector3){ x, CUBES_Y_START, CUBES_Z_START }, area, area, area, node->color);
+//     }
+// }
+

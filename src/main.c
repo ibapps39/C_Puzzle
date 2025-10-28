@@ -89,10 +89,10 @@ int main()
 
         // Draw the scene
         DrawCube(floor_pos, floor_width, floor_height, floor_length, floor_color);
-       // DrawCube(refCube_pos, refCube_width, refCube_height, refCube_length, refCube_color);
-        //drawDirections();
-        drawCubeSort(LIST, (Vector3){-1, 4, 4}, 4);
-        //drawCubeSort(SortedLIST, (Vector3){-1+4, 4+4, 4+4}, 4);
+       //  DrawCube(refCube_pos, refCube_width, refCube_height, refCube_length, refCube_color);
+        // drawDirections();
+        // drawCubeSort(LIST, (Vector3){-1, 4, 4}, 4);
+        // drawCubeSort(SortedLIST, (Vector3){-1+4, 4+4, 4+4}, 4);
 
         EndMode3D();
 
