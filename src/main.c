@@ -1,5 +1,6 @@
 #include "game.h"
-
+#include "room.h"
+#include "render.h"
 int main()
 {
     // Get screen size and initialize window
@@ -21,7 +22,7 @@ int main()
     Vector3 floor_pos;
     int floor_width, floor_height, floor_length;
     Color floor_color = RED;
-    floor_pos = (Vector3){0.0f, -2.0f, 0.0f};
+    floor_pos = (Vector3){0.0f, (float)GROUND-2, 0.0f};
     floor_width = 1000;
     floor_height = 2;
     floor_length = 1000;
@@ -58,11 +59,20 @@ int main()
 
     float verticalVelocity = 0.0f;
 
-    CubeNode* LIST = GenCubeList(10);
-    //CubeNode* SortedLIST = SortedCubeList(LIST, 10);
+    Vector3 pos_array[] = {
+        (Vector3){0, floor+3, 5},
+        (Vector3){DEFFAULT_BLOCK_SIZE, floor+2*DEFFAULT_BLOCK_SIZE, 5},
+        (Vector3){DEFFAULT_BLOCK_SIZE*2, floor+3*DEFFAULT_BLOCK_SIZE, 5}
+    };
+    int pos_array_size = (int)sizeof(pos_array)/sizeof(pos_array[0]);
+    
+    //Vector3* dynamic_pos_array = malloc(sizeof(Vector3)*MAX_CUBES);
+
+     
     // Main game loop
     while (!WindowShouldClose())
     {
+        
         currentPOS = *&the_camera.position;
         previousPOS = currentPOS;
         
@@ -78,6 +88,7 @@ int main()
         moveBasedCam(&the_camera, 5.0f * delta);
         RotateCamera(&the_camera, 0.1f, &yaw, &pitch);  // mouse look
         Gravity(&the_camera, &verticalVelocity);
+        addBlock_limited(&the_camera, pos_array, pos_array_size);
         
         // Reset player position if Q is pressed
         if (IsKeyDown(KEY_Q)) the_camera.position = (Vector3){0, floor, 0};
@@ -88,12 +99,10 @@ int main()
         BeginMode3D(the_camera);
 
         // Draw the scene
+        ClickArrayRender(pos_array, pos_array_size);
         DrawCube(floor_pos, floor_width, floor_height, floor_length, floor_color);
-       //  DrawCube(refCube_pos, refCube_width, refCube_height, refCube_length, refCube_color);
-        // drawDirections();
-        // drawCubeSort(LIST, (Vector3){-1, 4, 4}, 4);
-        // drawCubeSort(SortedLIST, (Vector3){-1+4, 4+4, 4+4}, 4);
-
+        //LoadRoomA( (Vector3){-1, floor, 10} );
+        
         EndMode3D();
 
         // HUD or debug info
@@ -108,7 +117,7 @@ int main()
         ),
         10,
         100,
-        10,
+        20,
         BLACK
         );
 
@@ -124,14 +133,10 @@ int main()
                 A
         ),
         10,
-        210,
+        230,
         20,
         PINK
         );
-
-
-         DrawText( TextFormat("FLAG: %i", FLAG), 10, 200, 10, ORANGE);
-        //  DrawText( TextFormat("FLAG STATUS: %s", FEATURE_FLAG_STATUS[FLAG]), 10, 30, 10, PINK);
 
         EndDrawing();
     }

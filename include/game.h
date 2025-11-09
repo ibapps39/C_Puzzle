@@ -11,6 +11,7 @@
 #include "rlgl.h"
 #include "raymath.h"
 
+
 // Constants
 #define FRAME_RATE 60
 #define PLAYER_HEIGHT 2.0f
@@ -18,8 +19,8 @@
 #define GRAVITY 9.8f
 #define MOVE_SPEED 5.0f
 #define JUMP_FORCE 6.0f
-#define SPRINT_MODIFER 10.0f
-#define GROUND 2
+#define SPRINT_MODIFIER 10.0f
+#define GROUND 0
 
 #define TURQUOISE CLITERAL(Color){64, 224, 208, 255}
 
@@ -70,12 +71,6 @@ typedef struct AABB
     Vector3 min;
     Vector3 max;
 } AABB;
-
-// bool CheckCollisionPLAYER(Player* PlayerBox, AABB* CollisionBox)
-// {
-//     // return CheckCollisionBoxes()
-
-// }
 
 // Initialization Functions
 void InitCamera(Camera3D *camera, const CameraSettings *cameraSettings)
@@ -133,12 +128,12 @@ void moveBasedCam(Camera3D *cam, const float speed)
     bool moveLeft = IsKeyDown(KEY_A);
     bool moveRight = IsKeyDown(KEY_D);
     bool moveJump = IsKeyDown(KEY_SPACE);
-    //bool moveSprint = IsKeyDown(KEY_LEFT_CONTROL);
+    bool moveSprint = IsKeyDown(KEY_LEFT_SHIFT);
+    float units = moveSprint ? speed * SPRINT_MODIFIER : speed;
+    if (!(moveFwd || moveBack || moveLeft || moveRight || moveJump)) return;
 
-    if (!(moveFwd || moveBack || moveLeft || moveRight || moveJump))
-        return;
-
-    float units = IsKeyDown(KEY_LEFT_SHIFT) ? (float)SPRINT_MODIFER * speed : speed;
+    
+    DrawText(TextFormat("units: %.2f", units), 10, 60, 30, PINK);
     Vector3 pos = cam->position;
     Vector3 target = cam->target;
     Vector3 fwd = Vector3Subtract(target, pos);
@@ -147,19 +142,19 @@ void moveBasedCam(Camera3D *cam, const float speed)
 
     Vector3 delta = (Vector3){0.0f, 0.0f, 0.0f};
 
-    if (moveFwd)
-        delta = Vector3Add(delta, fwdNScaled);
-    if (moveBack)
-        delta = Vector3Subtract(delta, fwdNScaled);
-    if (moveRight || moveLeft)
+    if (moveFwd)  delta = Vector3Add        (delta, (Vector3){fwdNScaled.x, 0, fwdNScaled.z});
+    if (moveBack) delta = Vector3Subtract   (delta, fwdNScaled);
+    if ((moveRight || moveLeft))
     {
         Vector3 perpV = Vector3CrossProduct(fwdN, cam->up);
         Vector3 perpN = Vector3Normalize(perpV);
         Vector3 perpNScaled = Vector3Scale(perpN, units);
         if (moveLeft)
             delta = Vector3Subtract(delta, perpNScaled);
+            delta = Vector3Scale(delta, units);
         if (moveRight)
             delta = Vector3Add(delta, perpNScaled);
+            delta = Vector3Scale(delta, units);
     }
 
     if (moveJump)
@@ -167,7 +162,7 @@ void moveBasedCam(Camera3D *cam, const float speed)
 
     // Scaling speedup scale fix
     delta = Vector3Normalize(delta);
-    delta = Vector3Scale(delta, speed);
+    delta = Vector3Scale(delta, units);
 
     cam->position = Vector3Add(pos, delta);
 }
@@ -277,8 +272,9 @@ void drawDirections()
 {
     DrawCube((Vector3){-100, 0, 1000}, 100, 100, 100, RED);   // NORTH
     DrawCube((Vector3){-100, 100, 1000}, 100, 100, 100, RED); // NORTH
-    DrawCube((Vector3){0, 0, 1000}, 100, 100, 100, RED);      // NORTH
-    DrawCube((Vector3){100, 100, 1000}, 100, 100, 100, RED);  // NORTH
+    DrawCube((Vector3){0, 100, 1000}, 100, 100, 100, RED);      // NORTH
+    DrawCube((Vector3){100, 0, 1000}, 100, 100, 100, RED); 
+    DrawCube((Vector3){200, 100, 1000}, 100, 100, 100, RED);  // NORTH
 
     DrawCube((Vector3){0, 0, -1000}, 100, 100, 100, GREEN); // SOUTH
     DrawCube((Vector3){-1000, 0, 0}, 100, 100, 100, BLUE);  // WEST
