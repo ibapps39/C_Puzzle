@@ -1,57 +1,127 @@
 #pragma once
+
 #include "game.h"
+#include <memory.h>
+
 #define ADD_BLOCK_DIST_MAX 5.00
-#define DEFFAULT_BLOCK_SIZE 10.00
+#define DEFAULT_BLOCK_SIZE 4
 #define MAX_CUBES 5
+#define MAX_RENDER_LIST_ELEMENTS 50
+#define INVALID_POSITION \
+    (Vector3) { INFINITY, INFINITY, INFINITY }
+#define DEFAULT_BLOCK_COLOR PINK
+
+// void (*render_geometry[4])(Vector3 position, float width, float height, float length, Color color);
 
 /// @brief Vector3* should be treated and seen as an array. Vector3's because its most geomtry agnostic/generic.
-typedef struct
+typedef struct RenderList
 {
-    Vector3* positions_array;
-    int last_modified_index;
+    Vector3 *positions_array;
+    unsigned int last_set_index;
+    unsigned int capacity;
+    bool overflow_flag;
 } RenderList;
 
 /// @brief Create an "array" but let initial values default to NULL rather than (Vector3){0}s.
-/// @param rl - The RenderList to be modified.
-/// @param max_elements - The max amount of elements that can be added to the positions_array.
-void init_render_list(RenderList* rl, const int max_elements)
+/// @param rl The RenderList to be modified.
+/// @param capacity The max amount of elements that can be added to the positions_array.
+void rl_init(RenderList *rl, const int capacity)
 {
-    rl->positions_array = malloc(sizeof(RenderList)*max_elements);
-    rl->positions_array = 0;
+    rl->positions_array = NULL;
+    rl->positions_array = malloc(sizeof(RenderList) * capacity);
+    rl->last_set_index = 0;
+    rl->capacity = capacity;
+    rl->overflow_flag = 0;
+}
+
+void rl_free(RenderList *rl)
+{
+    free(rl->positions_array);
+    rl->positions_array = NULL;
+    rl->last_set_index = 0;
+    rl->capacity = 0;
+    rl->overflow_flag = 0;
+}
+void rl_uninit_last_index(RenderList *rl)
+{
+    if (!rl || !(rl->positions_array))
+        return;
+
+    for (size_t i = 0; i < rl->last_set_index; i++)
+    {
+        rl->positions_array[i] = INVALID_POSITION;
+    }
+}
+
+// void rl_uninit(RenderList* rl)
+// {
+//     if (!rl || !(rl->positions_array)) return;
+
+//     memset(rl->positions_array, NULL, sizeof(Vector3) * rl->capacity);
+
+//     rl->last_set_index = 0;
+//     rl->overflow_flag = 0;
+// }
+
+// void rl_undo(RenderList* rl)
+// {
+//     if (!rl || !(rl->positions_array)) return;
+//     rl->positions_array[rl->last_set_index] = INVALID_POSITION;
+//     rl->last_set_index--;
+// }
+Vector3 getTarget(Camera3D *cam)
+{
+    return cam->target;
+}
+Vector3 get_placement_vector(Camera3D* cam, float distance_units)
+{
+    Vector3 dir = Vector3Subtract(cam->target, cam->position);
+    dir = Vector3Normalize(dir);
+    dir = Vector3Add(cam->target, Vector3Scale(dir, distance_units));
+    return dir;
 }
 // assumes fixed sized array
-void addBlock(Camera3D *cam, Vector3 *list, int* current_index, const size_t allocated_size)
+void addBlock(RenderList *rl, Vector3* v)
 {
-    int size = (int)allocated_size;
-    float max_dist = (float)ADD_BLOCK_DIST_MAX;
+    int size = rl->capacity;
+    int current_index = rl->last_set_index;
 
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    if (current_index >= size)
     {
-        Vector3 pos = Vector3Subtract(cam->target, cam->position);
-
-        if (Vector3Length(pos) > max_dist)
-        {
-            pos = Vector3Scale(Vector3Normalize(pos), max_dist);
-        }
-        // wrap around to first element if at current size
-        if (*current_index >= size)
-        {
-            *current_index = 0;
-        }
-
-        list[*current_index] = pos;
-        *(current_index) = *(current_index) + 1;
+        rl->last_set_index = 0;
+        rl->overflow_flag = true;
     }
+
+    rl->positions_array[current_index] = *v;
+    rl->last_set_index += 1;
 }
 
 /// @brief Renders everything in r, a renderlist array
 /// @param r
-void ClickArrayRender(Vector3 *r, int size)
+void ClickArrayRender(Vector3 *r, int capacity)
 {
-    for (size_t i = 0; i < size; i++)
+    for (size_t i = 0; i < capacity; i++)
     {
-        // printf("size: %i\n", size);
-        DrawCube(r[i], DEFFAULT_BLOCK_SIZE, DEFFAULT_BLOCK_SIZE, DEFFAULT_BLOCK_SIZE, YELLOW);
-        DrawCubeWires(r[i], DEFFAULT_BLOCK_SIZE, DEFFAULT_BLOCK_SIZE, DEFFAULT_BLOCK_SIZE + 1, BLACK);
+        if (r[i].x == INVALID_POSITION.x || r[i].y == INVALID_POSITION.y || r[i].z == INVALID_POSITION.z)
+        {
+            continue;
+        }
+
+        DrawCube(r[i], DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE, YELLOW);
+        DrawCubeWires(r[i], DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE + 1, BLACK);
     }
+}
+
+void drawlist(RenderList *render_list)
+{
+    for (size_t i = 0; i < render_list->capacity; i++)
+    {
+        const char *txt = TextFormat("render_list.positions_array[%i].x = %.2f\n, render_list.positions_array[%i].y = %.2f\n, render_list.positions_array[%i].z = %.2f", (i, render_list->positions_array[i]).x, i, (render_list->positions_array[i]).y, i, (render_list->positions_array[i]).z);
+        DrawText(txt, 260, 230, 20, PURPLE);
+    }
+}
+
+void draw_reticle(Vector3* pos)
+{
+    DrawCubeWires(*pos, DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE, BLACK);
 }

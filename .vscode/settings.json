@@ -2,7 +2,8 @@
     "C_Cpp.default.compilerPath": "/usr/bin/clang",
     "files.associations": {
         "*.cpp": "cpp",
-        "__node_handle": "c"
+        "__node_handle": "c",
+        "__config": "c"
     },
     "makefile.configureOnOpen": true
 }

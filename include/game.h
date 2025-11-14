@@ -143,7 +143,7 @@ void moveBasedCam(Camera3D *cam, const float speed)
     Vector3 delta = (Vector3){0.0f, 0.0f, 0.0f};
 
     if (moveFwd)  delta = Vector3Add        (delta, (Vector3){fwdNScaled.x, 0, fwdNScaled.z});
-    if (moveBack) delta = Vector3Subtract   (delta, fwdNScaled);
+    if (moveBack) delta = Vector3Subtract   (delta, (Vector3){fwdNScaled.x, 0, fwdNScaled.z});
     if ((moveRight || moveLeft))
     {
         Vector3 perpV = Vector3CrossProduct(fwdN, cam->up);
