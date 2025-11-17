@@ -1,6 +1,7 @@
 #include "game.h"
 #include "room.h"
 #include "render.h"
+#include "collision.h"
 int main()
 {
     // Get screen size and initialize window
@@ -92,8 +93,7 @@ int main()
             Vector3 v = get_placement_vector(&the_camera, ADD_BLOCK_DIST_MAX);
             addBlock(&render_list, &v);
         }
-
-        // LoadRoomA( (Vector3){-1, floor, 10} );
+        apply_rl_collisions(&render_list, &the_camera);
 
         EndMode3D();
 

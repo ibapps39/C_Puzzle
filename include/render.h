@@ -3,8 +3,8 @@
 #include "game.h"
 #include <memory.h>
 
-#define ADD_BLOCK_DIST_MAX 5.00
-#define DEFAULT_BLOCK_SIZE 4
+#define ADD_BLOCK_DIST_MAX 2.00
+#define DEFAULT_BLOCK_SIZE 2
 #define MAX_CUBES 5
 #define MAX_RENDER_LIST_ELEMENTS 50
 #define INVALID_POSITION \
