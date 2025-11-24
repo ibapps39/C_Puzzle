@@ -121,6 +121,13 @@ int sign(int x)
     }
 }
 
+Vector3 get_direction(Camera3D* cam)
+{
+    Vector3 pos = cam->position;
+    Vector3 target = cam->target;
+    return Vector3Subtract(target, pos);
+}
+
 void moveBasedCam(Camera3D *cam, const float speed)
 {
     bool moveFwd = IsKeyDown(KEY_W);
@@ -136,7 +143,7 @@ void moveBasedCam(Camera3D *cam, const float speed)
     DrawText(TextFormat("units: %.2f", units), 10, 60, 30, PINK);
     Vector3 pos = cam->position;
     Vector3 target = cam->target;
-    Vector3 fwd = Vector3Subtract(target, pos);
+    Vector3 fwd = get_direction(cam);
     Vector3 fwdN = Vector3Normalize(fwd);
     Vector3 fwdNScaled = Vector3Scale(fwdN, units);
 
@@ -191,7 +198,8 @@ void RotateCamera(Camera3D *cam, float mouseSensitivity, float *yaw, float *pitc
     Vector3 direction = {
         cosf(pitch_radians) * cosf(yaw_radians),
         sinf(pitch_radians),
-        cosf(pitch_radians) * sinf(yaw_radians)};
+        cosf(pitch_radians) * sinf(yaw_radians)
+    };
 
     cam->target = Vector3Add(cam->position, direction);
 }
@@ -221,11 +229,6 @@ void Gravity(Camera3D *cam, float *velocityY)
         cam->position.y = GROUND;
         *velocityY = 0.0f;
     }
-}
-
-// V
-void vel()
-{
 }
 
 // Points u to v
