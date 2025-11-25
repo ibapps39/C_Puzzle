@@ -11,7 +11,6 @@
     (Vector3) { INFINITY, INFINITY, INFINITY }
 #define DEFAULT_BLOCK_COLOR PINK
 
-
 /// @brief Vector3* should be treated and seen as an array. Vector3's because its most geomtry agnostic/generic.
 typedef struct RenderList
 {
@@ -22,9 +21,6 @@ typedef struct RenderList
     bool overflow_flag;
 } RenderList;
 
-/// @brief Create an "array" but let initial values default to NULL rather than (Vector3){0}s.
-/// @param rl The RenderList to be modified.
-/// @param capacity The max amount of elements that can be added to the positions_array.
 void rl_init(RenderList *rl, const int capacity)
 {
     rl->positions_array = NULL;
@@ -55,29 +51,8 @@ void rl_uninit_last_index(RenderList *rl)
 
 void rl_uninit_index(RenderList *rl, int i)
 {
-    if (!rl || !(rl->positions_array) || !(rl->positions_array+i)) return;
+    if (!rl || !(rl->positions_array) || !(rl->positions_array+i)) return; 
     rl->positions_array[i] = INVALID_POSITION;
-}
-
-// void rl_uninit(RenderList* rl)
-// {
-//     if (!rl || !(rl->positions_array)) return;
-
-//     memset(rl->positions_array, NULL, sizeof(Vector3) * rl->capacity);
-
-//     rl->block_index = 0;
-//     rl->overflow_flag = 0;
-// }
-
-// void rl_undo(RenderList* rl)
-// {
-//     if (!rl || !(rl->positions_array)) return;
-//     rl->positions_array[rl->block_index] = INVALID_POSITION;
-//     rl->block_index--;
-// }
-Vector3 getTarget(Camera3D *cam)
-{
-    return cam->target;
 }
 
 Vector3 get_placement_vector(Camera3D* cam, float distance_units)
@@ -88,11 +63,33 @@ Vector3 get_placement_vector(Camera3D* cam, float distance_units)
     return dir;
 }
 
-void addBlock(RenderList *rl, Vector3* v)
+// Vector3Equals(v, INVALID_POSITION) seems to always return 1
+int is_invalid(Vector3 v)
+{
+    return v.x == INVALID_POSITION.x || v.y == INVALID_POSITION.y || v.z == INVALID_POSITION.z;
+}
+int is_placeable(RenderList* rl, Vector3* v)
+{
+    for (size_t i = 0; i < rl->capacity; i++)
+    {
+        if (Vector3Distance(rl->positions_array[i], *v) <= DEFAULT_BLOCK_SIZE)
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+bool add_block_to_list(RenderList *rl, Vector3* v)
 {
     int size = rl->capacity;
     int current_index = rl->block_index;
 
+    if (is_invalid(*v) || is_placeable(rl, v) == 0)
+    {
+       return false;
+    }
+    
     if (current_index >= size)
     {
         rl->block_index = 0;
@@ -101,31 +98,22 @@ void addBlock(RenderList *rl, Vector3* v)
 
     rl->positions_array[current_index] = *v;
     rl->block_index += 1;
+    return true;
 }
 
 /// @brief Renders everything in r, an array of user defined points
 /// @param r
-void click_add_to_list(Vector3 *r, int capacity)
+void rl_draw_list(Vector3 *r, int capacity)
 {
     for (size_t i = 0; i < capacity; i++)
     {
-        if (r[i].x == INVALID_POSITION.x || r[i].y == INVALID_POSITION.y || r[i].z == INVALID_POSITION.z)
+        if (is_invalid(r[i]))
         {
             continue;
         }
         // check enum, call rendering function
         DrawCube(r[i], DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE, YELLOW);
         DrawCubeWires(r[i], DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE + 1, BLACK);
-    }
-}
-/// @brief Renders everything in the render list, render_list
-/// @param render_list 
-void draw_render_list(RenderList *render_list)
-{
-    for (size_t i = 0; i < render_list->capacity; i++)
-    {
-        const char *txt = TextFormat("render_list.positions_array[%i].x = %.2f\n, render_list.positions_array[%i].y = %.2f\n, render_list.positions_array[%i].z = %.2f", (i, render_list->positions_array[i]).x, i, (render_list->positions_array[i]).y, i, (render_list->positions_array[i]).z);
-        DrawText(txt, 260, 230, 20, PURPLE);
     }
 }
 

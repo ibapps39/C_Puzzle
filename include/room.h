@@ -21,7 +21,7 @@ struct ROOM
 };
 typedef struct ROOM ROOM;
 
-void initRoomZERO(ROOM* room)
+void init_room_ZERO(ROOM* room)
 {
     room->room_map          = NULL;
     room->room_length       = 0;
@@ -30,7 +30,7 @@ void initRoomZERO(ROOM* room)
     room->wall_color        = (Color){0};
     room->room_cell_size    = 0.0f;
 }
-void initRoom(ROOM* room,
+void init_room(ROOM* room,
     int* room_map,
     size_t  room_length,
     size_t  room_width,

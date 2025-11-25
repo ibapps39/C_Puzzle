@@ -14,8 +14,3 @@ typedef struct block
     Vector3 center_point; // Where the reticle places the entire shape, tether
     Vector3* vertices;
 } BLOCK;
-
-// BLOCK get_base_block(Vector3* placement_point)
-// {
-    
-// }
