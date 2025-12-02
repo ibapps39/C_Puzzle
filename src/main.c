@@ -1,5 +1,7 @@
 #include "game.h"
-
+#include "room.h"
+#include "render.h"
+#include "collision.h"
 int main()
 {
     // Get screen size and initialize window
@@ -7,21 +9,11 @@ int main()
     int screenHeight = GetScreenHeight();
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 
-    // Reference Cube
-    Vector3 refCube_pos;
-    int refCube_width, refCube_height, refCube_length;
-    Color refCube_color;
-    refCube_pos = (Vector3){0.0f, 2.0f, 4.0f};
-    refCube_width = 2;
-    refCube_height = 2;
-    refCube_length = 2;
-    refCube_color = BLUE;
-
     // Floor
     Vector3 floor_pos;
     int floor_width, floor_height, floor_length;
     Color floor_color = RED;
-    floor_pos = (Vector3){0.0f, -2.0f, 0.0f};
+    floor_pos = (Vector3){0.0f, (float)GROUND - 2, 0.0f};
     floor_width = 1000;
     floor_height = 2;
     floor_length = 1000;
@@ -32,107 +24,89 @@ int main()
     the_camera.fovy = 120;
     the_camera.position = (Vector3){0.0f, 2.0f, 0.0f};
     the_camera.projection = CAMERA_PERSPECTIVE;
-    the_camera.target = refCube_pos;
+    the_camera.target = (Vector3){0, 1, 3};
     the_camera.up = (Vector3){0.0f, 2.0f, 0.0f};
 
-    // XVA
-    Vector3 currentPOS = (Vector3){0};
-    Vector3 previousPOS = currentPOS;
-    float V = Vector3Length( Vector3Subtract(*&currentPOS, *&previousPOS) );
-    float* Vc = &V;
-    float A = (*Vc-V);
-    
-    enum FEATURE_FLAG {
-        FALSE,
-        TRUE
-    } FEATURE_FLAG;
-    
-    const char* FEATURE_FLAG_STATUS[2];
-    FEATURE_FLAG_STATUS[FALSE] = "ORTHO";
-    FEATURE_FLAG_STATUS[TRUE] = "PERSPECTIVE";
-
     SetMousePosition(GetScreenWidth() / 2, GetScreenHeight() / 2);
-    DisableCursor();  // Locks the mouse and hides the cursor
+    DisableCursor(); // Locks the mouse and hides the cursor
     float yaw = 0.0f;
     float pitch = 0.0f;
-
     float verticalVelocity = 0.0f;
 
-    CubeNode* LIST = GenCubeList(10);
-    //CubeNode* SortedLIST = SortedCubeList(LIST, 10);
+    RenderList render_list;
+    int render_list_limit = (int)MAX_RENDER_LIST_ELEMENTS;
+    rl_init(&render_list, render_list_limit);
+
+    BoundingBox test_cube_bbox;
+    BoundingBox camera_bbbox;
+    BoundingBox reticle_bbox;
+
+    Color test_cube_color = (Color){0,0,0,0};
+    Color test_cube_bbox_color = GREEN;
+    Color reticle_bbox_color = BLACK;
+
+    float test_cube_radius = 2;
+    float reticle_bbox_radius = DEFAULT_BLOCK_SIZE;
+
+    Vector3 test_cube_pos = (Vector3){3, floor-2, 4.0f};
+    Vector3 reticle_bbox_pos = Vector3Zero();
+    
+    // reticle bbox stuff
+    
+    test_cube_bbox.max = Vector3AddValue(test_cube_pos, test_cube_radius);
+    test_cube_bbox.min = Vector3SubtractValue(test_cube_pos, test_cube_radius);
+
+    // help center at start
+    the_camera.target = test_cube_pos;
+
     // Main game loop
     while (!WindowShouldClose())
     {
-        currentPOS = *&the_camera.position;
-        previousPOS = currentPOS;
+        Vector3 reticle_v = get_placement_vector(&the_camera, ADD_BLOCK_DIST_MAX);
+
+        // Make a set bbox min/max func
+        camera_bbbox.max = Vector3AddValue(the_camera.position, 1);
+        camera_bbbox.min = Vector3SubtractValue(the_camera.position, 1);
         
-        static enum FEATURE_FLAG FLAG = FALSE;
+        
+        reticle_bbox_color = CheckCollisionBoxes(reticle_bbox, test_cube_bbox) ? RED : GREEN;
+        reticle_bbox.max = Vector3AddValue(reticle_bbox_pos, 1);
+        reticle_bbox.min = Vector3SubtractValue(reticle_bbox_pos, 1);
+        reticle_bbox_pos = reticle_v;
+        
+        
+        
         // Delta time for frame-independent movement
         float delta = GetFrameTime();
-
-        V = Vector3Length( Vector3Subtract(*&currentPOS, *&previousPOS) );
-        Vc = &V;
-        A = (*Vc-V);
-        
-
-        moveBasedCam(&the_camera, 5.0f * delta);
-        RotateCamera(&the_camera, 0.1f, &yaw, &pitch);  // mouse look
+        move_based_cam(&the_camera, 5.0f * delta);
+        rotate_camera(&the_camera, 0.1f, &yaw, &pitch); // mouse look
         Gravity(&the_camera, &verticalVelocity);
-        
         // Reset player position if Q is pressed
-        if (IsKeyDown(KEY_Q)) the_camera.position = (Vector3){0, floor, 0};
+        if (IsKeyDown(KEY_Q)) 
+        { 
+            the_camera.position = (Vector3){0, floor, 0}; 
+        }
 
-        // Begin 3D drawing
         BeginDrawing();
         ClearBackground(WHITE);
         BeginMode3D(the_camera);
+// Begin
+        test_cube_color = CheckCollisionBoxes(camera_bbbox, test_cube_bbox) ? RED : GREEN;
+        DrawCube(test_cube_pos, test_cube_radius, test_cube_radius, test_cube_radius, test_cube_color);
 
-        // Draw the scene
+        DrawBoundingBox(test_cube_bbox, test_cube_color);
+        DrawBoundingBox(reticle_bbox, reticle_bbox_color);
+        //draw_reticle(&reticle_v);
+
+        rl_draw_list(render_list.positions_array, render_list_limit);
         DrawCube(floor_pos, floor_width, floor_height, floor_length, floor_color);
-       //  DrawCube(refCube_pos, refCube_width, refCube_height, refCube_length, refCube_color);
-        // drawDirections();
-        // drawCubeSort(LIST, (Vector3){-1, 4, 4}, 4);
-        // drawCubeSort(SortedLIST, (Vector3){-1+4, 4+4, 4+4}, 4);
-
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            add_block_to_list(&render_list, &reticle_v);
+        }
+        apply_rl_collisions(&render_list, &the_camera);
+// End
         EndMode3D();
-
-        // HUD or debug info
-        DrawText(
-            TextFormat("the_camera.position.x:%.2f\nthe_camera.position.y:%.2f\nthe_camera.position.z:%.2f\nthe_camera.target.x:%.2f\nthe_camera.target.y:%.2f\nthe_camera.target.z:%.2f\n",
-            the_camera.position.x,
-            the_camera.position.y,
-            the_camera.position.z,
-            the_camera.target.x,
-            the_camera.target.y,
-            the_camera.target.z
-        ),
-        10,
-        100,
-        10,
-        BLACK
-        );
-
-                DrawText(
-            TextFormat("curposition.x:%.2f\ncurposition.y:%.2f\ncurposition.z:%.2f\n,prevposition.x:%.2f\nprevposition.y:%.2f\nprevposition.z:%.2f\nv:%.2f\na:%.2f\n",
-                currentPOS.x,
-                currentPOS.y,
-                currentPOS.z,
-                previousPOS.x,
-                previousPOS.y,
-                previousPOS.z,
-                Vc,
-                A
-        ),
-        10,
-        210,
-        20,
-        PINK
-        );
-
-
-         DrawText( TextFormat("FLAG: %i", FLAG), 10, 200, 10, ORANGE);
-        //  DrawText( TextFormat("FLAG STATUS: %s", FEATURE_FLAG_STATUS[FLAG]), 10, 30, 10, PINK);
-
         EndDrawing();
     }
 
