@@ -37,11 +37,45 @@ int main()
     int render_list_limit = (int)MAX_RENDER_LIST_ELEMENTS;
     rl_init(&render_list, render_list_limit);
 
+    BoundingBox test_cube_bbox;
+    BoundingBox camera_bbbox;
+    BoundingBox reticle_bbox;
+
+    Color test_cube_color = (Color){0,0,0,0};
+    Color test_cube_bbox_color = GREEN;
+    Color reticle_bbox_color = BLACK;
+
+    float test_cube_radius = 2;
+    float reticle_bbox_radius = DEFAULT_BLOCK_SIZE;
+
+    Vector3 test_cube_pos = (Vector3){3, floor-2, 4.0f};
+    Vector3 reticle_bbox_pos = Vector3Zero();
+    
+    // reticle bbox stuff
+    
+    test_cube_bbox.max = Vector3AddValue(test_cube_pos, test_cube_radius);
+    test_cube_bbox.min = Vector3SubtractValue(test_cube_pos, test_cube_radius);
+
+    // help center at start
+    the_camera.target = test_cube_pos;
 
     // Main game loop
     while (!WindowShouldClose())
     {
+        Vector3 reticle_v = get_placement_vector(&the_camera, ADD_BLOCK_DIST_MAX);
 
+        // Make a set bbox min/max func
+        camera_bbbox.max = Vector3AddValue(the_camera.position, 1);
+        camera_bbbox.min = Vector3SubtractValue(the_camera.position, 1);
+        
+        
+        reticle_bbox_color = CheckCollisionBoxes(reticle_bbox, test_cube_bbox) ? RED : GREEN;
+        reticle_bbox.max = Vector3AddValue(reticle_bbox_pos, 1);
+        reticle_bbox.min = Vector3SubtractValue(reticle_bbox_pos, 1);
+        reticle_bbox_pos = reticle_v;
+        
+        
+        
         // Delta time for frame-independent movement
         float delta = GetFrameTime();
         move_based_cam(&the_camera, 5.0f * delta);
@@ -57,8 +91,13 @@ int main()
         ClearBackground(WHITE);
         BeginMode3D(the_camera);
 // Begin
-        Vector3 reticle_v = get_placement_vector(&the_camera, ADD_BLOCK_DIST_MAX);
-        draw_reticle(&reticle_v);
+        test_cube_color = CheckCollisionBoxes(camera_bbbox, test_cube_bbox) ? RED : GREEN;
+        DrawCube(test_cube_pos, test_cube_radius, test_cube_radius, test_cube_radius, test_cube_color);
+
+        DrawBoundingBox(test_cube_bbox, test_cube_color);
+        DrawBoundingBox(reticle_bbox, reticle_bbox_color);
+        //draw_reticle(&reticle_v);
+
         rl_draw_list(render_list.positions_array, render_list_limit);
         DrawCube(floor_pos, floor_width, floor_height, floor_length, floor_color);
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))

@@ -54,7 +54,7 @@ void rl_uninit_index(RenderList *rl, int i)
     if (!rl || !(rl->positions_array) || !(rl->positions_array+i)) return; 
     rl->positions_array[i] = INVALID_POSITION;
 }
-
+// get what the cam is looking at, place it direction_units away
 Vector3 get_placement_vector(Camera3D* cam, float distance_units)
 {
     Vector3 dir = Vector3Subtract(cam->target, cam->position);

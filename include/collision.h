@@ -31,3 +31,4 @@ void apply_rl_collisions(RenderList* rl, Vector3* object_pos)
         *object_pos = Vector3Add(incoming_object, Vector3Scale(dir, pushback));
     }
 }
+

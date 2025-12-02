@@ -24,6 +24,7 @@
 
 #define TURQUOISE CLITERAL(Color){64, 224, 208, 255}
 
+
 // Camera struct to store camera settings and label
 typedef struct
 {
@@ -282,4 +283,15 @@ void draw_directions()
     DrawCube((Vector3){0, 0, -1000}, 100, 100, 100, GREEN); // SOUTH
     DrawCube((Vector3){-1000, 0, 0}, 100, 100, 100, BLUE);  // WEST
     DrawCube((Vector3){1000, 0, 0}, 100, 100, 100, YELLOW); // EAST
+}
+
+void set_boundingbox_min_max(BoundingBox bbox, Vector3 min, Vector3 max)
+{
+    bbox.min = min;
+    bbox.max = max;
+}
+void set_dyn_boundingbox_min_max(BoundingBox* bbox, Vector3* min, Vector3* max)
+{
+    bbox->min = *min;
+    bbox->max = *max;
 }
