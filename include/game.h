@@ -24,6 +24,7 @@
 
 #define TURQUOISE CLITERAL(Color){64, 224, 208, 255}
 
+
 // Camera struct to store camera settings and label
 typedef struct
 {
@@ -73,7 +74,7 @@ typedef struct AABB
 } AABB;
 
 // Initialization Functions
-void InitCamera(Camera3D *camera, const CameraSettings *cameraSettings)
+void init_camera(Camera3D *camera, const CameraSettings *cameraSettings)
 {
     camera->fovy = cameraSettings->camFOVY;
     camera->position = cameraSettings->camPosition;
@@ -81,7 +82,7 @@ void InitCamera(Camera3D *camera, const CameraSettings *cameraSettings)
     camera->target = cameraSettings->camTarget;
     camera->up = cameraSettings->camUp;
 }
-void InitPlayerWithSettings(Player *player, PlayerSettings *ps)
+void init_player_with_settings(Player *player, PlayerSettings *ps)
 {
     player->playerCamera = ps->Camera;
     player->playerName = ps->Name;
@@ -90,7 +91,7 @@ void InitPlayerWithSettings(Player *player, PlayerSettings *ps)
     player->velocity = ps->Velocity;
 }
 
-void InitPlayerByValue(
+void init_player_by_value(
     Player *player,
     Camera3D camera,
     const char *name,
@@ -128,7 +129,7 @@ Vector3 get_direction(Camera3D* cam)
     return Vector3Subtract(target, pos);
 }
 
-void moveBasedCam(Camera3D *cam, const float speed)
+void move_based_cam(Camera3D *cam, const float speed)
 {
     bool moveFwd = IsKeyDown(KEY_W);
     bool moveBack = IsKeyDown(KEY_S);
@@ -174,7 +175,7 @@ void moveBasedCam(Camera3D *cam, const float speed)
     cam->position = Vector3Add(pos, delta);
 }
 
-void RotateCamera(Camera3D *cam, float mouseSensitivity, float *yaw, float *pitch)
+void rotate_camera(Camera3D *cam, float mouseSensitivity, float *yaw, float *pitch)
 {
     Vector2 mouse_delta = GetMouseDelta();
 
@@ -232,46 +233,46 @@ void Gravity(Camera3D *cam, float *velocityY)
 }
 
 // Points u to v
-void SetVector(Vector3 *u, Vector3 *v)
+void set_vector(Vector3 *u, Vector3 *v)
 {
     u = v;
 }
-void SetVectorPoints(Vector3 *u, Vector3 *v)
+void set_vector_points(Vector3 *u, Vector3 *v)
 {
     u->x = v->x;
     u->y = v->y;
     u->z = v->z;
 }
-void CopyVector(Vector3 *u, Vector3 pos)
+void copy_vector(Vector3 *u, Vector3 pos)
 {
     u->x = pos.x;
     u->y = pos.y;
     u->z = pos.z;
 }
 
-void SetPosByValue(Player *player, Vector3 pos)
+void set_pos_by_value(Player *player, Vector3 pos)
 {
     player->currentPOS->x = pos.x;
     player->currentPOS->y = pos.y;
     player->currentPOS->z = pos.z;
 }
-void SetPlayerPoint(Player *player, float x, float y, float z)
+void set_player_point(Player *player, float x, float y, float z)
 {
     player->currentPOS->x = x;
     player->currentPOS->y = y;
     player->currentPOS->z = z;
 }
-void SetPlayerVector(Player *player, Vector3 *u)
+void set_player_vector(Player *player, Vector3 *u)
 {
     player->currentPOS = u;
 }
 
-void GetPlayerAngle(Player *player)
+void get_player_angle(Player *player)
 {
     double pdx, pdy;
 }
 
-void drawDirections()
+void draw_directions()
 {
     DrawCube((Vector3){-100, 0, 1000}, 100, 100, 100, RED);   // NORTH
     DrawCube((Vector3){-100, 100, 1000}, 100, 100, 100, RED); // NORTH
@@ -282,4 +283,15 @@ void drawDirections()
     DrawCube((Vector3){0, 0, -1000}, 100, 100, 100, GREEN); // SOUTH
     DrawCube((Vector3){-1000, 0, 0}, 100, 100, 100, BLUE);  // WEST
     DrawCube((Vector3){1000, 0, 0}, 100, 100, 100, YELLOW); // EAST
+}
+
+void set_boundingbox_min_max(BoundingBox bbox, Vector3 min, Vector3 max)
+{
+    bbox.min = min;
+    bbox.max = max;
+}
+void set_dyn_boundingbox_min_max(BoundingBox* bbox, Vector3* min, Vector3* max)
+{
+    bbox->min = *min;
+    bbox->max = *max;
 }
