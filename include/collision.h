@@ -1,7 +1,8 @@
 #pragma once
 #include "render.h"
-#define COLLISION_TOUCH_DIST 0.025f
 
+#define COLLISION_TOUCH_DIST 0.025f
+#define DEFAULT_PADDING 0.503f
 
 // Use as: cam, rl.pos, default size
 bool is_collision(Vector3 u, Vector3 v, float radius)
@@ -32,3 +33,22 @@ void apply_rl_collisions(RenderList* rl, Vector3* object_pos)
     }
 }
 
+void set_boundingbox_min_max(BoundingBox* bbox, Vector3 min, Vector3 max)
+{
+    bbox->min = min;
+    bbox->max = max;
+}
+
+void calc_boundingbox_at(BoundingBox* bbox, Vector3 bbox_pos, float radius)
+{
+    radius *= DEFAULT_PADDING;
+    bbox->min = Vector3SubtractValue(bbox_pos, radius);
+    bbox->max = Vector3AddValue(bbox_pos, radius);
+}
+
+BoundingBox get_bbox_at(Vector3 pos, float radius)
+{
+    BoundingBox bbox;
+    calc_boundingbox_at(&bbox, pos, radius);
+    return bbox;
+}

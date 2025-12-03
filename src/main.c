@@ -1,7 +1,9 @@
 #include "game.h"
+#include "blocks.h"
 #include "room.h"
 #include "render.h"
 #include "collision.h"
+
 int main()
 {
     // Get screen size and initialize window
@@ -52,18 +54,20 @@ int main()
     Vector3 reticle_bbox_pos = Vector3Zero();
     
     // reticle bbox stuff
-    
-    test_cube_bbox.max = Vector3AddValue(test_cube_pos, test_cube_radius);
-    test_cube_bbox.min = Vector3SubtractValue(test_cube_pos, test_cube_radius);
+    calc_boundingbox_at(&test_cube_bbox, test_cube_pos, test_cube_radius*.505);
 
     // help center at start
     the_camera.target = test_cube_pos;
-
+    static float r_test = 0;
+    static float r_test_co = 1;
     // Main game loop
     while (!WindowShouldClose())
     {
+        if (r_test >= test_cube_radius) r_test_co *= -1;
+        if (r_test <= test_cube_radius) r_test_co *= -1;
+        r_test += 0.001*r_test_co;
         Vector3 reticle_v = get_placement_vector(&the_camera, ADD_BLOCK_DIST_MAX);
-
+        
         // Make a set bbox min/max func
         camera_bbbox.max = Vector3AddValue(the_camera.position, 1);
         camera_bbbox.min = Vector3SubtractValue(the_camera.position, 1);
