@@ -85,6 +85,7 @@ int main()
         move_based_cam(&the_camera, 5.0f * delta);
         rotate_camera(&the_camera, 0.1f, &yaw, &pitch); // mouse look
         Gravity(&the_camera, &verticalVelocity);
+        
         // Reset player position if Q is pressed
         if (IsKeyDown(KEY_Q)) 
         { 
