@@ -1,9 +1,7 @@
 #pragma once
 
-#include <memory.h>
-
 #include "game.h"
-
+#include <memory.h>
 
 #define ADD_BLOCK_DIST_MAX 2.00
 #define DEFAULT_BLOCK_SIZE 2
@@ -119,32 +117,7 @@ void rl_draw_list(Vector3 *r, int capacity)
     }
 }
 
-
-void draw_base_block(Vector3 pos, float radius, Color block_color)
+void draw_reticle(Vector3* pos)
 {
-    DrawCube(pos, radius, radius, radius, block_color);
+    DrawCubeWires(*pos, DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE, BLACK);
 }
-void draw_ramp_block(Vector3 pos){}
-void draw_bridge_block(Vector3 pos){}
-
-// draw_base_bbox(Vector3 pos){}
-// draw_ramp_bbox(Vector3 pos){}
-// draw_bridge_bbox(Vector3 pos){}
-
-// maybe include bbox...
-// draw_block(Block block)
-// {
-//     switch (block.type)
-//     {
-//     case Base:
-//         draw_base_block(block.center_point);
-//         break;
-//     case Ramp:
-//         draw_ramp_block(block.center_point);
-//         break;
-//     case Bridge:
-//         draw_bridge_block(block.center_point);
-//     default:
-//         break;
-//     }
-// }
